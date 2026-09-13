@@ -14,6 +14,7 @@ Chief Architect verification on that exact archive: `18 passed in 1.59s`.
 
 - A submitted audit reported 22 tests, while the canonical archive runs 18 tests.
 - A submitted audit described SFERA Report as absent. The canonical archive contains `sfera/report.py`, `SFERA_REPORT_RU.md`, and `tests/test_report_v15.py`.
+- A submitted audit reported board fixes (promotion chooser, redo, check/mate highlighting, PGN navigation) that are **not present in the canonical archive**. In canonical `ChessBoardWidget`, promotion auto-selects queen, undo exists but redo does not, and this widget has no explicit check/mate highlight or PGN move-navigation implementation.
 - The canonical Research Tree does create a new session and an in-memory priority queue on every `build()` call, so resume-after-restart remains a real gap.
 - The canonical Discovery `promote()` path can promote a candidate without an enforced control-group, counterexample and out-of-sample validation gate, so Discovery validation remains a real gap.
 
@@ -21,11 +22,12 @@ Chief Architect verification on that exact archive: `18 passed in 1.59s`.
 
 1. Discovery Validation Pipeline.
 2. Research Tree Resume.
-3. Storage Benchmark before storage rewrite.
-4. Richer Batch Analyzer semantics beyond cp-loss.
+3. Board Reliability against the production acceptance checklist.
+4. Storage Benchmark before storage rewrite.
+5. Richer Batch Analyzer semantics beyond cp-loss.
 
 ## Freeze
 
-Do not declare a new SFERA version from Council work until all auditors can inspect the same canonical source snapshot and TASK-0001 is rerun against it.
+Do not declare a new SFERA version from Council work until all auditors can inspect the same canonical source snapshot and TASK-0001R is rerun against it.
 
 Policy: **Evidence over votes. Same code before cross-review.**
