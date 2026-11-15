@@ -1,0 +1,47 @@
+name: CMEPT6 1.1 - Linux x64 test
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'engines/CMEPT6/**'
+      - '.github/workflows/cmept6-linux.yml'
+  pull_request:
+    paths:
+      - 'engines/CMEPT6/**'
+      - '.github/workflows/cmept6-linux.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: engines/CMEPT6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMEPT6_BUILD_INTERNAL_TESTS=ON
+      - name: Build
+        run: cmake --build build --parallel 2
+      - name: Tests
+        run: |
+          python3 tests/run_tests.py build/cmept6-engine
+          python3 tests/test_regression.py build/cmept6-engine
+          python3 tests/test_release.py build/cmept6-engine
+          python3 tests/test_referee.py
+          ./build/cmept6-slider-fuzz
+      - name: UCI self-play smoke test
+        run: >-
+          python3 tests/tournament.py
+          --a build/cmept6-engine --b build/cmept6-engine
+          --games 2 --depth 2 --max-plies 60
+          --out results/linux_ci_smoke
+      - name: Verify saved PGN and JSON data
+        run: python3 tests/validate_results.py results/linux_ci_smoke
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CMEPT6-Engine-1.1-Linux-x64
+          path: engines/CMEPT6/build/cmept6-engine

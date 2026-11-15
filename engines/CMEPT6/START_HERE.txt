@@ -1,0 +1,13 @@
+CMEPT6 ENGINE 1.1 — ПРОЕКТ ДЛЯ WINDOWS И LINUX
+
+WINDOWS: откройте BUILD_WINDOWS.md; исходный код компилируется в CMEPT6-Engine.exe
+через build_windows.bat или .github/workflows/windows.yml. Готового Windows EXE здесь нет.
+
+LINUX: ./bin/linux/cmept6-engine
+
+Проверенный независимый турнирный стенд: tests/tournament.py
+Тесты правил: tests/test_referee.py
+Партии: results/v1_1_vs_v0_4_68.pgn
+Сводка: results/v1_1_vs_v0_4_68.summary.json
+
+Сила движка пока не измерена надёжным Elo. 1.1 — инфраструктурный релиз.

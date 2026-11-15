@@ -1,0 +1,9 @@
+build/
+release/
+*.exe
+*.obj
+*.o
+*.pdb
+__pycache__/
+*.pyc
+results/*_ci_smoke*

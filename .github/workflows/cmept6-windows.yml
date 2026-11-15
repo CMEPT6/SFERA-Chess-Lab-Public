@@ -1,0 +1,61 @@
+name: CMEPT6 1.1 - Windows x64 release
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'engines/CMEPT6/**'
+      - '.github/workflows/cmept6-windows.yml'
+  pull_request:
+    paths:
+      - 'engines/CMEPT6/**'
+      - '.github/workflows/cmept6-windows.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-2022
+    defaults:
+      run:
+        working-directory: engines/CMEPT6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure C++17 x64 Release
+        run: cmake -S . -B build -A x64 -DCMAKE_BUILD_TYPE=Release
+      - name: Compile
+        run: cmake --build build --config Release --parallel
+      - name: Engine chess perft and UCI tests
+        run: python tests/run_tests.py build/Release/cmept6-engine.exe
+      - name: Engine regression tests
+        run: python tests/test_regression.py build/Release/cmept6-engine.exe
+      - name: Engine release tests
+        run: python tests/test_release.py build/Release/cmept6-engine.exe
+      - name: Independent chess rules referee tests
+        run: python tests/test_referee.py
+      - name: Self-play smoke test
+        run: >-
+          python tests/tournament.py
+          --a build/Release/cmept6-engine.exe
+          --b build/Release/cmept6-engine.exe
+          --name-a CMEPT6-A --name-b CMEPT6-B
+          --games 2 --depth 2 --max-plies 60
+          --out results/windows_ci_smoke
+      - name: Verify match output
+        run: python tests/validate_results.py results/windows_ci_smoke
+      - name: Prepare Windows package
+        shell: pwsh
+        run: |
+          New-Item -Path release -ItemType Directory -Force | Out-Null
+          Copy-Item build/Release/cmept6-engine.exe release/CMEPT6-Engine.exe
+          Copy-Item README.md, BUILD_WINDOWS.md, LICENSE, START_HERE.txt release/
+          Get-FileHash release/CMEPT6-Engine.exe -Algorithm SHA256 |
+            Select-Object Hash, Path | Format-Table -AutoSize | Out-String |
+            Set-Content release/SHA256-Windows.txt
+      - name: Upload native Windows executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: CMEPT6-Engine-1.1-Windows-x64
+          path: engines/CMEPT6/release/
+          if-no-files-found: error
