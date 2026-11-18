@@ -420,6 +420,17 @@ void legal_moves(Board& b, MoveList& legal, bool tactical = false) {
         unmake_move(b, m, u);
     }
 }
+bool has_legal_move(Board& b) {
+    MoveList pseudo; generate_pseudo(b, pseudo);
+    const int side = b.side;
+    for (auto m : pseudo) {
+        Undo u; make_move(b, m, u);
+        const bool legal = !in_check(b, side);
+        unmake_move(b, m, u);
+        if (legal) return true;
+    }
+    return false;
+}
 uint64_t perft(Board& b, int depth) {
 #ifdef CMEPT6_CHECK_INVARIANTS
     if (!valid_board_state(b)) throw std::runtime_error("board or zobrist invariant failed");
@@ -476,6 +487,9 @@ int evaluate(const Board& b) {
 }
 struct Entry { uint64_t key = 0; Move move{-1,-1,0}; int16_t depth = -1; int16_t score = 0; uint8_t bound = 0; };
 class Searcher {
+#ifdef CMEPT6_SEARCH_TESTS
+public: // Direct search regressions only; absent from production builds.
+#endif
     std::vector<Entry> tt;
     std::atomic<bool>& stopping;
     Clock::time_point started;
@@ -549,6 +563,9 @@ class Searcher {
         }
         if (ply >= MAX_PLY - 1) return evaluate(b);
         bool checked = in_check(b, b.side);
+        // Stalemate is a terminal draw, even at a quiet horizon or in a
+        // stand-pat cutoff window. A tactical-only move list cannot detect it.
+        if (!checked && !has_legal_move(b)) return 0;
         int stand = evaluate(b);
         if (!checked) {
             if (stand >= beta) return stand;
