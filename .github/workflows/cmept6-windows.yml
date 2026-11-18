@@ -34,6 +34,8 @@ jobs:
         run: python tests/test_release.py build/Release/cmept6-engine.exe
       - name: Independent chess rules referee tests
         run: python tests/test_referee.py
+      - name: Benchmark failure handling tests
+        run: python tests/test_benchmark.py
       - name: Self-play smoke test
         run: >-
           python tests/tournament.py

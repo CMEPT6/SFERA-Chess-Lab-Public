@@ -32,6 +32,7 @@ jobs:
           python3 tests/test_regression.py build/cmept6-engine
           python3 tests/test_release.py build/cmept6-engine
           python3 tests/test_referee.py
+          python3 tests/test_benchmark.py
           ./build/cmept6-slider-fuzz
       - name: UCI self-play smoke test
         run: >-
